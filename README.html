@@ -18,11 +18,6 @@
 <p>Load the jQWT script after you load jQuery on your pages and initiate it.</p>
 <pre><code class="lang-HTML">&lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&quot;&gt;&lt;/script&gt;
 &lt;script src=&quot;/path-to-source/jquery.windowThrottle.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    jQuery(document).ready(function($) {
-        $.windowThrottle();
-    });
-&lt;/script&gt;
 </code></pre>
 <h4 id="use">Use</h4>
 <p>It&#39;s important that you bind to the &quot;throttle.resize&quot; and &quot;throttle.scroll&quot; events before starting up the plugin. This way, the events will fire immediately when the page is ready, allowing your scripts to work their magic as soon as possible. You&#39;ll want to bind the window to the custom events that come from jQWT like so: </p>

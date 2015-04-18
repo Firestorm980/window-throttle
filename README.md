@@ -21,11 +21,6 @@ Load the jQWT script after you load jQuery on your pages and initiate it.
 ```HTML
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="/path-to-source/jquery.windowThrottle.js"></script>
-<script>
-	jQuery(document).ready(function($) {
-		$.windowThrottle();
-	});
-</script>
 ```
 
 ####Use
