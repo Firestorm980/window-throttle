@@ -63,7 +63,7 @@
 				if ( settings.detectScroll === true ){
 					// Bind event
 					// Use scroll and touchmove for older mobile browsers
-					$window.on('scroll touchmove', function(){ windowData.hasScrolled = true; });	
+					$window.on('scroll', function(){ windowData.hasScrolled = true; });	
 					// Set starting scroll position
 					windowData.scrollPosition = $window.scrollTop();	
 					// Start it up
