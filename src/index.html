@@ -6,19 +6,78 @@
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
+        <title>jQuery Window Throttle Demo</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+
+        <style>
+            .container {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .fixed {
+                position: fixed;
+                top: 0;
+                background: white;
+                padding: 1em;
+                left: 0;
+                width: 100%;
+                overflow-x: auto;
+            }
+            .row {
+                display: block;
+            }
+            #scrollPercent {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 0;
+                background: red;
+                height: 0.25em;
+            }
+        </style>
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
     </head>
     <body>
-        <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-
+        
+        <div class="fixed">
+            <span id="scrollPercent"></span>
+            <div class="row">sDelta: <span id="sDelta"></span> | wDelta: <span id="wDelta"></span> | hDelta: <span id="hDelta"></span></div>
+            <div class="row"><span id="orientation"></span> | width: <span id="width"></span> | height: <span id="height"></span></div>
+            
+        </div>
+        <div class="container">
         <!-- Add your site or application content here -->
-        <p>Hello world! This is HTML5 Boilerplate.</p>
+            <h1>Some heading</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <h1>Some heading</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <h1>Some heading</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <h1>Some heading</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
+        </div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
@@ -26,11 +85,24 @@
 
 		<script>
 			jQuery(document).ready(function($) {
-				
-				$.windowThrottle();
 
-				jQuery(window).on('throttle.resize', function(event){ console.log(event); });
+				jQuery(window).on('throttle.resize', function(event){
+                    console.log(event);
+                    jQuery('#orientation').text( event.orientation );
+                    jQuery('#height').text( event.dimensions.height );
+                    jQuery('#width').text( event.dimensions.width );
+                    jQuery('#hDelta').text( event.delta.height );
+                    jQuery('#wDelta').text( event.delta.width );
+                });
+                jQuery(window).on('throttle.scroll', function(event){ 
+                    console.log(event); 
+                    jQuery('#sDelta').text( event.delta );
+                    jQuery('#scrollPercent').css({ width : event.percent+'%' });
+                });
 
+                $.windowThrottle({
+                    useRAF: true
+                });
 			});
 		</script>
 

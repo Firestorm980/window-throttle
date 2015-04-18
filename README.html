@@ -1,0 +1,99 @@
+<h1 id="jquery-window-throttle">jQuery Window Throttle</h1>
+<h2 id="the-overdone-window-event-plugin">The overdone window event plugin</h2>
+<p>jQuery Window Throttle (jQWT) normalizes and throttles the window scroll and resize events between browsers while also offering some great event data so that you stop calculating values and just get things done. jQWT uses either a custom interval timeout or Request Animation Frame to poll the window for any changes in size or scroll position. jQWT returns the following data:</p>
+<h4 id="scroll">Scroll</h4>
+<ul>
+<li>Scroll percentage down the page (event.percent)</li>
+<li>Scroll delta from the previous polling position (event.delta)</li>
+</ul>
+<h4 id="resize">Resize</h4>
+<ul>
+<li>Orientation, landscape or portrait (event.orientation)</li>
+<li>A boolean of if the width or height changed (event.changed.width, event.changed.height)</li>
+<li>Delta in width and height from previous polling position (event.delta.width, event.delta.height)</li>
+<li>The new dimensions of the window (event.dimensions.width, event.dimensions.height)</li>
+</ul>
+<h1 id="getting-started">Getting Started</h1>
+<h4 id="installation">Installation</h4>
+<p>Load the jQWT script after you load jQuery on your pages and initiate it.</p>
+<pre><code class="lang-HTML">&lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/path-to-source/jquery.windowThrottle.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    jQuery(document).ready(function($) {
+        $.windowThrottle();
+    });
+&lt;/script&gt;
+</code></pre>
+<h4 id="use">Use</h4>
+<p>It&#39;s important that you bind to the &quot;throttle.resize&quot; and &quot;throttle.scroll&quot; events before starting up the plugin. This way, the events will fire immediately when the page is ready, allowing your scripts to work their magic as soon as possible. You&#39;ll want to bind the window to the custom events that come from jQWT like so: </p>
+<pre><code class="lang-HTML">&lt;script src=&quot;//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/path-to-source/jquery.windowThrottle.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    jQuery(document).ready(function($) {
+        jQuery(window).on(&#39;throttle.resize&#39;, function(event){ 
+            // Do your stuff here
+            // Access the data using the event object (ex. &quot;event.orientation&quot;)
+        });
+        jQuery(window).on(&#39;throttle.scroll&#39;, function(event){ 
+            // Do your stuff here
+            // Access the data using the event object (ex. &quot;event.delta&quot;)
+        });
+
+        $.windowThrottle();
+    });
+&lt;/script&gt;
+</code></pre>
+<h5 id="event-data">Event Data</h5>
+<p>Here are two examples of the event data returned when one of the custom events is triggered.</p>
+<h6 id="scrolling">Scrolling</h6>
+<pre><code class="lang-Javascript">event: {
+    delta: 0,
+    percent: 0    
+}
+</code></pre>
+<h6 id="resize">Resize</h6>
+<pre><code class="lang-Javascript">event: {
+    changed: { width: false, height: false },
+    dimensions: { width: 1280, height: 720 },
+    delta: { width: 0, height: 0 },
+    orientation: &#39;landscape&#39;
+}
+</code></pre>
+<h4 id="options">Options</h4>
+<p>These are the options currently available for jQWT:</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>detectResize</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Bind the resize event</td>
+</tr>
+<tr>
+<td><code>detectScroll</code></td>
+<td><code>boolean</code></td>
+<td><code>true</code></td>
+<td>Bind the scroll event</td>
+</tr>
+<tr>
+<td><code>pollingTime</code></td>
+<td><code>number</code></td>
+<td><code>150</code></td>
+<td>Set the amount of time between polling in milliseconds. Disabled if <code>useRAF</code> is <code>true</code>.</td>
+</tr>
+<tr>
+<td><code>useRAF</code></td>
+<td><code>boolean</code></td>
+<td><code>false</code></td>
+<td>Use window.requestAnimationFrame. Overrides <code>pollingTime</code>. Falls back to setTimeout in older browsers.</td>
+</tr>
+</tbody>
+</table>
