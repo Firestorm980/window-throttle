@@ -21,7 +21,7 @@
 		useRAF: false // Uses requestAnimationFrame. Falls back to a timeout.
 	};
 
-	$.windowThrottle = function(options){
+	$.WindowThrottle = function(options){
 		var settings = $.extend({}, defaults, options);
 
 		var windowData = {
@@ -73,15 +73,16 @@
 				methods.poll();
 			},
 			setRAF: function(){
-				window.requestAnimFrame = (function(callback) {
-				return 	window.requestAnimationFrame || 
-						window.webkitRequestAnimationFrame || 
-						window.mozRequestAnimationFrame || 
-						window.oRequestAnimationFrame || 
-						window.msRequestAnimationFrame ||
+				var windowElement = window;
+				windowElement.requestAnimFrame = (function(callback) {
+				return 	windowElement.requestAnimationFrame || 
+						windowElement.webkitRequestAnimationFrame || 
+						windowElement.mozRequestAnimationFrame || 
+						windowElement.oRequestAnimationFrame || 
+						windowElement.msRequestAnimationFrame ||
 						// Fallback to a timeout in older browsers
 						function(callback) {
-							window.setTimeout(callback, 1000 / 60);
+							windowElement.setTimeout(callback, 1000 / 60);
 						};
 				})();
 			},
@@ -185,12 +186,15 @@
 			}
 		};
 
-		// Start everything
-		methods.init();
-
 		// Public Methods
 		return {
-
+			/**
+			 * Public function to start up the plugin with.
+			 * @public
+			 */
+			init: function(){
+				methods.init(); // Start it up.
+			}
 		};
 	};
 })( jQuery );

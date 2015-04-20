@@ -1,8 +1,8 @@
-jQuery Window Throttle
-======================
+Window Throttle
+===============
 ##The overdone window event plugin
 
-jQuery Window Throttle (jQWT) normalizes and throttles the window scroll and resize events between browsers while also offering some great event data so that you stop calculating values and just get things done. jQWT uses either a custom interval timeout or Request Animation Frame to poll the window for any changes in size or scroll position. jQWT returns the following data:
+Window Throttle (WT) normalizes and throttles the window scroll and resize events between browsers while also offering some great event data so that you stop calculating values and just get things done. WT uses either a custom interval timeout or Request Animation Frame to poll the window for any changes in size or scroll position. It is available in vanilla JS or a jQuery plugin. WT returns the following data:
 
 ####Scroll
 - Scroll percentage down the page (event.percent)
@@ -16,7 +16,14 @@ jQuery Window Throttle (jQWT) normalizes and throttles the window scroll and res
 
 #Getting Started
 ####Installation
-Load the jQWT script after you load jQuery on your pages and initiate it.
+Load the WT script before your custom scripts.
+
+```HTML
+<script src="/path-to-source/windowThrottle.js"></script>
+```
+
+Or load the jQuery WT script after you load jQuery on your pages.
+
 
 ```HTML
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -24,10 +31,30 @@ Load the jQWT script after you load jQuery on your pages and initiate it.
 ```
 
 ####Use
-It's important that you bind to the "throttle.resize" and "throttle.scroll" events before starting up the plugin. This way, the events will fire immediately when the page is ready, allowing your scripts to work their magic as soon as possible. You'll want to bind the window to the custom events that come from jQWT like so: 
+It's important that you bind to the "throttle.resize" and "throttle.scroll" events before starting up the plugin. This way, the events will fire immediately when the page is ready, allowing your scripts to work their magic as soon as possible. You'll want to bind the window to the custom events that come from WT like so: 
+
 ```HTML
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="/path-to-source/jquery.windowThrottle.js"></script>
+<script>
+	(function($) {
+
+        window.addEventListener('throttle.resize', function(event){ 
+			// Do your stuff here
+			// Access the data using the event object (ex. "event.detail.orientation")
+        }, false);
+        window.addEventListener('throttle.scroll', function(event){
+			// Do your stuff here
+			// Access the data using the event object (ex. "event.detail.delta")        	
+        }, false);
+
+        WindowThrottle.init();
+
+	})();
+</script>
+```
+
+With jQuery:
+
+```HTML
 <script>
 	jQuery(document).ready(function($) {
 		jQuery(window).on('throttle.resize', function(event){ 
@@ -39,24 +66,24 @@ It's important that you bind to the "throttle.resize" and "throttle.scroll" even
 			// Access the data using the event object (ex. "event.delta")
 		});
 
-		$.windowThrottle();
+		jQuery.WindowThrottle();
 	});
 </script>
 ```
 
 #####Event Data
-Here are two examples of the event data returned when one of the custom events is triggered.
+Here are two examples of the event data returned when one of the custom events is triggered. Keep in mind that when using the vanilla version the event object is slightly different. You'll need to access data with "event.details", where jQuery you'll just need "event".
 
 ######Scrolling
 ```Javascript
-event: {
+{
 	delta: 0,
 	percent: 0	
 }
 ```
 ######Resize
 ```Javascript
-event: {
+{
 	changed: { width: false, height: false },
 	dimensions: { width: 1280, height: 720 },
 	delta: { width: 0, height: 0 },
@@ -65,7 +92,7 @@ event: {
 ```
 
 ####Options
-These are the options currently available for jQWT:
+These are the options currently available for WT:
 
 | Option       | Type   | Default        | Description                                                             |
 |--------------|--------|----------------|-------------------------------------------------------------------------|
