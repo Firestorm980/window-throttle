@@ -78,16 +78,16 @@
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
         </div>
-<!--
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
+        <!-- If you'd like to use jQuery...
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 		<script src="../src/jquery.windowThrottle.js"></script>
--->
+        -->
         <script src="../src/windowThrottle.js"></script>
 
 		<script>
-			(function($) {
-
+		(function($) {
+  
                 window.addEventListener('throttle.resize', function(event){ 
                     document.getElementById('orientation').innerHTML = event.detail.orientation;
                     document.getElementById('height').innerHTML = event.detail.dimensions.height;
@@ -102,9 +102,10 @@
                     document.getElementById('scrollPercent').style.width = event.detail.percent+'%';
                 });
 
-                WindowThrottle.init();
+                WindowThrottle.init({ useRAF: true });
 
-/*
+                /* If you'd like to use jQuery...
+
 				jQuery(window).on('throttle.resize', function(event){
 
                     jQuery('#orientation').text( event.orientation );
@@ -119,9 +120,9 @@
                     jQuery('#scrollPercent').css({ width : event.percent+'%' });
                 });
 
-                jQuery.WindowThrottle();
+                jQuery.WindowThrottle().init();
 
-*/
+                */
 			})();
 		</script>
 

@@ -46,7 +46,7 @@ It's important that you bind to the "throttle.resize" and "throttle.scroll" even
 			// Access the data using the event object (ex. "event.detail.delta")        	
         }, false);
 
-        WindowThrottle.init();
+        WindowThrottle.init({ /* Options here */ });
 
 	})();
 </script>
@@ -66,7 +66,7 @@ With jQuery:
 			// Access the data using the event object (ex. "event.delta")
 		});
 
-		jQuery.WindowThrottle();
+		jQuery.WindowThrottle({ /* Options here */ }).init();
 	});
 </script>
 ```
@@ -96,7 +96,7 @@ These are the options currently available for WT:
 
 | Option       | Type   | Default        | Description                                                             |
 |--------------|--------|----------------|-------------------------------------------------------------------------|
-| `detectResize`  | `boolean` | `true`   | Bind the resize event               |
+| `detectResize`  | `boolean` | `true`   | Bind the resize event |
 | `detectScroll`  | `boolean` | `true`   | Bind the scroll event |
 | `pollingTime`   | `number`  | `150`    | Set the amount of time between polling in milliseconds. Disabled if `useRAF` is `true`. |
 | `useRAF`        | `boolean` | `false`  | Use window.requestAnimationFrame. Overrides `pollingTime`. Falls back to setTimeout in older browsers. |
