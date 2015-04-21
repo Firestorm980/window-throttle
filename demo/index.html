@@ -100,9 +100,9 @@
                 window.addEventListener('throttle.scroll', function(event){
                     document.getElementById('sDelta').innerHTML = event.detail.delta;
                     document.getElementById('scrollPercent').style.width = event.detail.percent+'%';
-                });
+                }, false);
 
-                WindowThrottle.init({ useRAF: true });
+                WindowThrottle.init();
 
                 /* If you'd like to use jQuery...
 
