@@ -2,7 +2,7 @@
  * Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.0
+ * @version: 1.1
  *
  * Licensed under the MIT License.
  */
@@ -162,7 +162,7 @@
 		// Resize functions
 		resize: {
 			/**
-			 * The resize event function. Handles all of the data we're interested in and triggers the 'throttle.resize' event.
+			 * The resize event function. Handles all of the data we're interested in and triggers the 'wt.resize' event.
 			 * @private
 			 */
 			event: function(){
@@ -189,7 +189,7 @@
 					orientation: windowData.orientation
 				};
 				// Kick off the event
-				methods.events.triggerCustom( windowElement, 'throttle.resize', eventObject);
+				methods.events.triggerCustom( windowElement, 'wt.resize', eventObject);
 				// Update the window data
 				windowData.width = newWidth;
 				windowData.height = newHeight;
@@ -217,7 +217,7 @@
 		// Scrolling functions
 		scroll: {
 			/**
-			 * The scrolling event function. Handles all of the data we're interested in and triggers the 'throttle.scroll' event.
+			 * The scrolling event function. Handles all of the data we're interested in and triggers the 'wt.scroll' event.
 			 * @private
 			 */
 			event: function(){
@@ -241,7 +241,7 @@
 					percent: { y: scrollPercentY, x: scrollPercentX }
 				};
 				// Kick off the event
-				methods.events.triggerCustom( windowElement, 'throttle.scroll', eventObject);
+				methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
 				// Update the window data
 				windowData.scrollPositionY = scrollY;
 				windowData.scrollPositionX = scrollX;
@@ -300,7 +300,7 @@
 			/**
 			 * Set off our custom events from the plugin.
 			 * @param  {Object} el          The document element to attach the event to.
-			 * @param  {String} eventName   The name of the event (in our case, "throttle.resize").
+			 * @param  {String} eventName   The name of the event (in our case, "wt.resize").
 			 * @param  {Object} eventObject The event data to include.
 			 */
 			triggerCustom: function( el, eventName, eventObject ){
@@ -315,7 +315,7 @@
 	 * @public
 	 * @param {Object} options User settings
 	 */
-	WindowThrottle.init = function ( options ) {
+	Windowwt.init = function ( options ) {
  
 		// feature test
 		if ( !supports ) return;

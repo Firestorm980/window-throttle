@@ -2,7 +2,7 @@
  * jQuery Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.0
+ * @version: 1.1
  *
  * Licensed under the MIT License.
  */
@@ -105,7 +105,7 @@
 					methods.resize.getOrientation( newWidth, newHeight );
 					// Our event data
 					var eventObject = {
-						type: 'throttle.resize',
+						type: 'wt.resize',
 						changed: { width: widthChanged, height: heightChanged },
 						dimensions: { width: newWidth, height: newHeight },
 						delta: { width: widthDelta, height: heightDelta },
@@ -149,7 +149,7 @@
 
 					// Our event data
 					var eventObject = {
-						type: 'throttle.scroll',
+						type: 'wt.scroll',
 						delta: { y: scrollDeltaY, x: scrollDeltaX },
 						percent: { y: scrollPercentY, x: scrollPercentX }
 					};
