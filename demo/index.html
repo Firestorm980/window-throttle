@@ -88,22 +88,20 @@
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
         </div>
 
+        <!-- If you'd like to use jQuery...
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-
 		<script src="../src/jquery.windowThrottle.js"></script>
-<!--
+        -->
         <script src="../src/windowThrottle.js"></script>
--->
+
 		<script>
 			(function($) {
-/*
                 window.addEventListener('throttle.resize', function(event){ 
                     document.getElementById('orientation').innerHTML = event.detail.orientation;
                     document.getElementById('height').innerHTML = event.detail.dimensions.height;
                     document.getElementById('width').innerHTML = event.detail.dimensions.width;
                     document.getElementById('hDelta').innerHTML = event.detail.delta.height;
                     document.getElementById('wDelta').innerHTML = event.detail.delta.width;
-
                 }, false);
 
                 window.addEventListener('throttle.scroll', function(event){
@@ -111,11 +109,12 @@
                     document.getElementById('sXDelta').innerHTML = event.detail.delta.x;
                     document.getElementById('scrollPercentY').style.height = event.detail.percent.y+'%';
                     document.getElementById('scrollPercentX').style.width = event.detail.percent.x+'%';
-                });
+                }, false);
 
                 WindowThrottle.init();
 
-*/
+                /* If you'd like to use jQuery...
+
 				jQuery(window).on('throttle.resize', function(event){
  
                     jQuery('#orientation').text( event.orientation );
@@ -133,7 +132,7 @@
                 });
 
                 jQuery.WindowThrottle();
-
+                */
 			})();
 		</script>
 
