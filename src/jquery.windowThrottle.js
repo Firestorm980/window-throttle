@@ -29,7 +29,8 @@
 			hasScrolled: false,
 			width: 0,
 			height: 0,
-			scrollPosition: 0,
+			scrollPositionY: 0,
+			scrollPositionX: 0,
 			orientation: null
 		};
 
@@ -55,7 +56,7 @@
 					windowData.width = $window.width();
 					windowData.height = $window.height();
 					// Set starting orientation
-					methods.resize.setOrientation( windowData.width, windowData.height );
+					methods.resize.getOrientation( windowData.width, windowData.height );
 					// Start up the resize function
 					methods.resize.event(); // Run on page load
 				}
@@ -65,7 +66,8 @@
 					// Use scroll and touchmove for older mobile browsers
 					$window.on('scroll', function(){ windowData.hasScrolled = true; });	
 					// Set starting scroll position
-					windowData.scrollPosition = $window.scrollTop();	
+					windowData.scrollPositionY = $window.scrollTop();
+					windowData.scrollPositionX = $window.scrollLeft();	
 					// Start it up
 					methods.scroll.event();
 				}
@@ -100,14 +102,14 @@
 						widthDelta = newWidth - oldWidth,
 						heightDelta = newHeight - oldHeight;
 					// Set orientation
-					methods.resize.setOrientation( newWidth, newHeight );
+					methods.resize.getOrientation( newWidth, newHeight );
 					// Our event data
 					var eventObject = {
 						type: 'throttle.resize',
 						changed: { width: widthChanged, height: heightChanged },
 						dimensions: { width: newWidth, height: newHeight },
 						delta: { width: widthDelta, height: heightDelta },
-						orientation: methods.resize.getOrientation()
+						orientation: windowData.orientation
 					};
 					// Kick off the event
 					$window.trigger( eventObject );
@@ -115,28 +117,17 @@
 					windowData.width = newWidth;
 					windowData.height = newHeight;
 				},
-				setOrientation: function( width, height ){
+				getOrientation: function(){
+					var windowElement = window;
 					// Use match media if available. Much more accurate.
-					if ( window.matchMedia !== undefined ){
-						if ( window.matchMedia("(orientation: landscape)").matches ){ windowData.orientation = 'landscape'; }
-						if ( window.matchMedia("(orientation: portrait)").matches ){ windowData.orientation = 'portrait'; }
+					if ( windowElement.matchMedia !== undefined ){
+						if ( windowElement.matchMedia("(orientation: landscape)").matches ){ windowData.orientation = 'landscape'; }
+						if ( windowElement.matchMedia("(orientation: portrait)").matches ){ windowData.orientation = 'portrait'; }
 					}
 					// Fallback to just using the dimensions
 					else {
 						if ( width > height || width === height ){ windowData.orientation = 'landscape'; }
 						if ( width < height ){ windowData.orientation = 'portrait'; }
-					}
-				},
-				getOrientation: function(){
-					// Use match media if available. Much more accurate.
-					if ( window.matchMedia !== undefined ){
-						if ( window.matchMedia("(orientation: landscape)").matches ){ return 'landscape'; }
-						if ( window.matchMedia("(orientation: portrait)").matches ){ return 'portrait'; }
-					}
-					// Fallback to just using the dimensions
-					else {
-						if ( windowData.width > windowData.height || windowData.width === windowData.height ){ return 'landscape'; }
-						if ( windowData.width < windowData.height ){ return 'portrait'; }
 					}
 				}
 			},
@@ -145,20 +136,28 @@
 					// Calculations
 					var 
 						$window = jQuery(window),
-						scrollTop = $window.scrollTop(),
+						scrollY = $window.scrollTop(),
+						scrollX = $window.scrollLeft(),
 						documentHeight = jQuery(document).height(),
-						scrollPercent = Math.round( ( scrollTop / ( documentHeight - windowData.height ) ) * 100 ),
-						scrollDelta = scrollTop - windowData.scrollPosition;
+						documentWidth = jQuery(document).width(),
+						scrollPercentYRaw = ( scrollY / ( documentHeight - windowData.height ) ) * 100,
+						scrollPercentXRaw = ( scrollX / ( documentWidth - windowData.width ) ) * 100,
+						scrollPercentY = ( scrollPercentYRaw > 100 ) ? 100 : scrollPercentYRaw,
+						scrollPercentX = ( scrollPercentXRaw > 100 ) ? 100 : scrollPercentXRaw,
+						scrollDeltaY = scrollY - windowData.scrollPositionY,
+						scrollDeltaX = scrollX - windowData.scrollPositionX;
+
 					// Our event data
 					var eventObject = {
 						type: 'throttle.scroll',
-						delta: scrollDelta,
-						percent: scrollPercent
+						delta: { y: scrollDeltaY, x: scrollDeltaX },
+						percent: { y: scrollPercentY, x: scrollPercentX }
 					};
 					// Kick off the event
 					$window.trigger( eventObject );
 					// Update the window data
-					windowData.scrollPosition = scrollTop;
+					windowData.scrollPositionY = scrollY;
+					windowData.scrollPositionX = scrollX;
 				}
 			},
 			poll: function(){
@@ -186,15 +185,12 @@
 			}
 		};
 
+		// Start it up.
+		methods.init();
+
 		// Public Methods
 		return {
-			/**
-			 * Public function to start up the plugin with.
-			 * @public
-			 */
-			init: function(){
-				methods.init(); // Start it up.
-			}
+
 		};
 	};
 })( jQuery );

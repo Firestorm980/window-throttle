@@ -33,7 +33,8 @@
 		hasScrolled: false,
 		width: 0,
 		height: 0,
-		scrollPosition: 0,
+		scrollPositionY: 0,
+		scrollPositionX: 0,
 		orientation: null
 	};
 
@@ -90,16 +91,6 @@
 		return extended;
 	};
  
-	/**
-	 * Convert data-options attribute into an object of key/value pairs
-	 * @private
-	 * @param {String} options Link-specific options as a data attribute string
-	 * @returns {Object}
-	 */
-	var getDataOptions = function ( options ) {
-    		return !options || !(typeof JSON === 'object' && typeof JSON.parse === 'function') ? {} : JSON.parse( options );
-	};
- 
  	/**
  	 * Methods object from the original plugin. Encapsulates all plugin internal functions.
  	 * @type {Object}
@@ -142,7 +133,8 @@
 				windowElement.addEventListener('scroll', function(){ windowData.hasScrolled = true; });
 
 				// Set starting scroll position
-				windowData.scrollPosition = windowElement.pageYOffset;
+				windowData.scrollPositionY = windowElement.pageYOffset;
+				windowData.scrollPositionX = windowElement.pageXOffset;
 
 				// Start it up
 				methods.scroll.event();
@@ -232,20 +224,27 @@
 				// Calculations
 				var 
 					windowElement = window,
-					scrollTop = windowElement.scrollY,
+					scrollY = windowElement.pageYOffset,
+					scrollX = windowElement.pageXOffset,
 					documentHeight = document.body.scrollHeight,
-					scrollPercentRaw = ( scrollTop / ( documentHeight - windowData.height ) ) * 100,
-					scrollPercent = ( scrollPercentRaw > 100 ) ? 100 : scrollPercentRaw,
-					scrollDelta = scrollTop - windowData.scrollPosition;
+					documentWidth = document.body.scrollWidth,
+					scrollPercentYRaw = ( scrollY / ( documentHeight - windowData.height ) ) * 100,
+					scrollPercentXRaw = ( scrollX / ( documentWidth - windowData.width ) ) * 100,
+					scrollPercentY = ( scrollPercentYRaw > 100 ) ? 100 : scrollPercentYRaw,
+					scrollPercentX = ( scrollPercentXRaw > 100 ) ? 100 : scrollPercentXRaw,
+					scrollDeltaY = scrollY - windowData.scrollPositionY,
+					scrollDeltaX = scrollX - windowData.scrollPositionX;
+
 				// Our event data
 				var eventObject = {
-					delta: scrollDelta,
-					percent: scrollPercent
+					delta: { y: scrollDeltaY, x: scrollDeltaX },
+					percent: { y: scrollPercentY, x: scrollPercentX }
 				};
 				// Kick off the event
 				methods.events.triggerCustom( windowElement, 'throttle.scroll', eventObject);
 				// Update the window data
-				windowData.scrollPosition = scrollTop;
+				windowData.scrollPositionY = scrollY;
+				windowData.scrollPositionX = scrollX;
 			}
 		},
 		/**
