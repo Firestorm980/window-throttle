@@ -7,6 +7,7 @@ Window Throttle (WT) normalizes and throttles the window scroll and resize event
 ####Scroll
 - Scroll percentage in either direction on the page (event.percent)
 - Scroll delta in either direction from the previous polling position (event.delta)
+- Scroll position in either direction (event.scroll)
 
 ####Resize
 - Orientation, landscape or portrait (event.orientation)
@@ -46,7 +47,7 @@ It's important that you bind to the "wt.resize" and "wt.scroll" events before st
 			// Access the data using the event object (ex. "event.detail.delta")        	
         }, false);
 
-        WindowThrottle().init({ /* Options here */ });
+        WindowThrottle.init({ /* Options here */ });
 
 	})();
 </script>
@@ -78,7 +79,8 @@ Here are two examples of the event data returned when one of the custom events i
 ```Javascript
 {
 	delta: { y: 0, x: 0 },
-	percent: { y: 0, x: 0 }	
+	percent: { y: 0, x: 0 },
+	scroll: { y: 0, x: 0 }
 }
 ```
 ######Resize
@@ -103,6 +105,10 @@ These are the options currently available for WT:
 
 
 ##Changelog
+
+####1.2
+- Added scrolling data for page position (essentially `scrollTop` and `scrollLeft`)
+- Added another demo for optimization and performance use (testing for rAF).
 
 ####1.1
 - Added scrolling data for the horizontal axis.

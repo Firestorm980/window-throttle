@@ -54,6 +54,7 @@
             
             <div class="row">sYDelta: <span id="sYDelta"></span> \ sXDelta: <span id="sXDelta"></span> | wDelta: <span id="wDelta"></span> \ hDelta: <span id="hDelta"></span></div>
             <div class="row"><span id="orientation"></span> | width: <span id="width"></span> | height: <span id="height"></span></div>
+            <div class="row">sTop: <span id="sTop"></span> \ sLeft: <span id="sLeft"></span></div>
             
         </div>
         <div class="container">
@@ -96,7 +97,7 @@
 
 		<script>
 			(function($) {
-                window.addEventListener('throttle.resize', function(event){ 
+                window.addEventListener('wt.resize', function(event){ 
                     document.getElementById('orientation').innerHTML = event.detail.orientation;
                     document.getElementById('height').innerHTML = event.detail.dimensions.height;
                     document.getElementById('width').innerHTML = event.detail.dimensions.width;
@@ -104,14 +105,16 @@
                     document.getElementById('wDelta').innerHTML = event.detail.delta.width;
                 }, false);
 
-                window.addEventListener('throttle.scroll', function(event){
+                window.addEventListener('wt.scroll', function(event){
                     document.getElementById('sYDelta').innerHTML = event.detail.delta.y;
                     document.getElementById('sXDelta').innerHTML = event.detail.delta.x;
                     document.getElementById('scrollPercentY').style.height = event.detail.percent.y+'%';
                     document.getElementById('scrollPercentX').style.width = event.detail.percent.x+'%';
+                    document.getElementById('sTop').innerHTML = event.detail.scroll.y;
+                    document.getElementById('sLeft').innerHTML = event.detail.scroll.x;
                 }, false);
 
-                WindowThrottle.init();
+                WindowThrottle.init({ useRAF: true });
 
                 /* If you'd like to use jQuery...
 

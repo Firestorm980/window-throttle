@@ -2,7 +2,7 @@
  * jQuery Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.1
+ * @version: 1.2
  *
  * Licensed under the MIT License.
  */
@@ -151,7 +151,8 @@
 					var eventObject = {
 						type: 'wt.scroll',
 						delta: { y: scrollDeltaY, x: scrollDeltaX },
-						percent: { y: scrollPercentY, x: scrollPercentX }
+						percent: { y: scrollPercentY, x: scrollPercentX },
+						scroll: { y: scrollY, x: scrollX }
 					};
 					// Kick off the event
 					$window.trigger( eventObject );
