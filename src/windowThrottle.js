@@ -38,6 +38,8 @@
 		orientation: null
 	};
 
+	var scheduledAnimationFrame = false;
+
 	// Default settings
 	var defaults = {
 		// Options
@@ -114,8 +116,8 @@
 			if ( settings.detectResize === true ){
 				// Bind Events
 				// Use resize and orientation change for mobile browsers
-				windowElement.addEventListener('resize', function(){ windowData.hasResized = true; });
-				windowElement.addEventListener('orientationchangei', function(){ windowData.hasResized = true; });
+				windowElement.addEventListener('resize', methods.resize.on);
+				windowElement.addEventListener('orientationchange', methods.resize.on);
 
 				// Set starting width and height
 				windowData.width = windowElement.innerWidth;
@@ -130,7 +132,7 @@
 			// Scrolling
 			if ( settings.detectScroll === true ){
 				// Bind event			
-				windowElement.addEventListener('scroll', function(){ windowData.hasScrolled = true; });
+				windowElement.addEventListener('scroll', methods.scroll.on);
 
 				// Set starting scroll position
 				windowData.scrollPositionY = windowElement.pageYOffset;
@@ -139,8 +141,11 @@
 				// Start it up
 				methods.scroll.event();
 			}
-			// Start polling
-			methods.poll();
+			// Start polling if we aren't using rAF.
+			// rAF essentially will poll "on demand"
+			if ( !settings.useRAF ){
+				methods.poll();
+			}
 		},
 		/**
 		 * Polyfill function so that the requestAnimationFrame function is normalized between browsers.
@@ -161,6 +166,14 @@
 		},
 		// Resize functions
 		resize: {
+			on: function(){
+				// Set so we know we've resized.
+				windowData.hasResized = true;
+				// If using rAF, do some different checking.
+				if ( settings.useRAF ){
+					methods.checkAnimationFrame();
+				}
+			},
 			/**
 			 * The resize event function. Handles all of the data we're interested in and triggers the 'wt.resize' event.
 			 * @private
@@ -188,11 +201,39 @@
 					delta: { width: widthDelta, height: heightDelta },
 					orientation: windowData.orientation
 				};
+
+				// Include type for jQuery
+				if ( window.jQuery ){
+					eventObject.type = 'wt.resize';
+				}
+
 				// Kick off the event
-				methods.events.triggerCustom( windowElement, 'wt.resize', eventObject);
+				// If we're not using rAF
+				if ( !settings.useRAF ){
+					// Trigger vanilla
+					methods.events.triggerCustom( windowElement, 'wt.resize', eventObject);
+					// Trigger jQuery
+					if ( window.jQuery ){
+						jQuery(window).trigger( eventObject );
+					}
+				}
+				// If we are using rAF
+				else {
+					requestAnimFrame( function(){ 
+						// Trigger vanilla
+						methods.events.triggerCustom( windowElement, 'wt.resize', eventObject); 
+						// Trigger jQuery
+						if ( window.jQuery ){
+							jQuery(window).trigger( eventObject );
+						}
+					} );
+				}
 				// Update the window data
 				windowData.width = newWidth;
 				windowData.height = newHeight;
+				// Reset our vars
+				windowData.hasResized = false;
+				scheduledAnimationFrame = false;
 			},
 			/**
 			 * Gets the orientation of the viewport with matchMedia and using width/height as fallback. Puts the result into the windowData.orientation
@@ -216,6 +257,14 @@
 		},
 		// Scrolling functions
 		scroll: {
+			on: function(){
+				// Set so we know we've scrolled.
+				windowData.hasScrolled = true;
+				// If using rAF, do some different checking.
+				if ( settings.useRAF ){
+					methods.checkAnimationFrame();
+				}
+			},
 			/**
 			 * The scrolling event function. Handles all of the data we're interested in and triggers the 'wt.scroll' event.
 			 * @private
@@ -241,11 +290,39 @@
 					percent: { y: scrollPercentY, x: scrollPercentX },
 					scroll: { y: scrollY, x: scrollX }
 				};
+
+				// Include type for jQuery
+				if ( window.jQuery ){
+					eventObject.type = 'wt.scroll';
+				}
+
 				// Kick off the event
-				methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
+				// If we aren't using rAF
+				if ( !settings.useRAF ){
+					// Trigger vanilla
+					methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
+					// Trigger jQuery
+					if ( window.jQuery ){
+						jQuery(window).trigger( eventObject );
+					}
+				}
+				// If we are using rAF
+				else {
+					requestAnimFrame( function(){ 
+						// Trigger vanilla
+						methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
+						// Trigger jQuery
+						if ( window.jQuery ){
+							jQuery(window).trigger( eventObject );
+						}
+					} );
+				}
 				// Update the window data
 				windowData.scrollPositionY = scrollY;
 				windowData.scrollPositionX = scrollX;
+				// Reset our vars
+				windowData.hasScrolled = false;
+				scheduledAnimationFrame = false;
 			}
 		},
 		/**
@@ -254,12 +331,7 @@
 		 */
 		poll: function(){
 			// Check if we're using rAF
-			if ( settings.useRAF ){
-				methods.checkForChanges(); // Check for changes
-				requestAnimFrame( methods.poll ); // Run another poll when ready. Uses our polyfill function.
-			}
-			// Use setInterval instead
-			else {
+			if ( !settings.useRAF ){
 				// Check for changes using the polling time in the settings.
 				setInterval( methods.checkForChanges, settings.pollingTime);
 			}
@@ -273,14 +345,34 @@
 			// Check if we've scrolled and if we're interested
 			if ( windowData.hasScrolled && settings.detectScroll === true ){
 				methods.scroll.event(); // Do our scroll event
-				windowData.hasScrolled = false; // Reset the boolean
 			}
 			// Check if we've resized and if we're interested
 			if ( windowData.hasResized && settings.detectResize === true ){
 				methods.resize.event(); // Do our resize event
-				windowData.hasResized = false; // Reset the boolean
 			}
 		},
+		/**
+		 * Function runs at every native scroll and resize event.
+		 * It checks if we're currently working on a frame. If we aren't, it queues up a new one with the event.
+		 * @private
+		 */
+		checkAnimationFrame: function(){
+			// Is there already a frame being processed?
+			// If not, keep going
+			if ( !scheduledAnimationFrame ){
+				// We're processing a frame. Make sure we don't double up.
+				scheduledAnimationFrame = true; 
+				// Do we want scroll events?
+				if ( settings.detectScroll === true ){
+					methods.scroll.event(); // Do our scroll event
+				}
+				// Do we want resize events?
+				if ( settings.detectResize === true ){
+					methods.resize.event(); // Do our resize event
+				}
+			}
+		},
+
 		// Special events functions
 		events: {
 			/**
