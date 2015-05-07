@@ -2,7 +2,7 @@
  * Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.2
+ * @version: 1.3
  *
  * Licensed under the MIT License.
  */
@@ -35,7 +35,9 @@
 		height: 0,
 		scrollPositionY: 0,
 		scrollPositionX: 0,
-		orientation: null
+		orientation: null,
+		documentHeight: 0,
+		documentWidth: 0
 	};
 
 	var scheduledAnimationFrame = false;
@@ -46,7 +48,9 @@
 		detectResize: true, // Set to detect resize
 		detectScroll: true, // Set to detect scrolling
 		pollingTime: 150, // Uses setInterval
-		useRAF: false // Uses requestAnimationFrame. Falls back to a timeout.
+		useRAF: false, // Uses requestAnimationFrame. Falls back to a timeout.
+		scrollClass: 'wt-scrolling',
+		resizeClass: 'wt-resizing'
 	};
  
  
@@ -114,29 +118,31 @@
 
 			// Resize
 			if ( settings.detectResize === true ){
+				// Set starting width and height
+				windowData.width = windowElement.innerWidth;
+				windowData.height = windowElement.innerHeight;
+				windowData.documentHeight = document.body.scrollHeight;
+				windowData.documentWidth = document.body.scrollWidth;
+
+				// Set starting orientation
+				methods.resize.getOrientation( windowData.width, windowData.height );
+
 				// Bind Events
 				// Use resize and orientation change for mobile browsers
 				windowElement.addEventListener('resize', methods.resize.on);
 				windowElement.addEventListener('orientationchange', methods.resize.on);
-
-				// Set starting width and height
-				windowData.width = windowElement.innerWidth;
-				windowData.height = windowElement.innerHeight;	
-
-				// Set starting orientation
-				methods.resize.getOrientation( windowData.width, windowData.height );
 
 				// Start up the resize function
 				methods.resize.event(); // Run on page load
 			}
 			// Scrolling
 			if ( settings.detectScroll === true ){
-				// Bind event			
-				windowElement.addEventListener('scroll', methods.scroll.on);
-
 				// Set starting scroll position
 				windowData.scrollPositionY = windowElement.pageYOffset;
 				windowData.scrollPositionX = windowElement.pageXOffset;
+
+				// Bind event			
+				windowElement.addEventListener('scroll', methods.scroll.on);
 
 				// Start it up
 				methods.scroll.event();
@@ -166,12 +172,22 @@
 		},
 		// Resize functions
 		resize: {
+			timeout: null,
+			/**
+			 * Function that starts handling the raw event for us.
+			 * @private
+			 */
 			on: function(){
+				var htmlEl = document.querySelector('html');
 				// Set so we know we've resized.
 				windowData.hasResized = true;
 				// If using rAF, do some different checking.
 				if ( settings.useRAF ){
 					methods.checkAnimationFrame();
+				}
+				// Set the resize class if it isn't there
+				if ( !htmlEl.classList.contains(settings.resizeClass) ){
+					htmlEl.classList.add(settings.resizeClass);
 				}
 			},
 			/**
@@ -181,16 +197,22 @@
 			event: function(){
 				// Calculations
 				var 
+					// New document dimensions to store
+					newDocumentHeight = document.body.scrollHeight,
+					newDocumentWidth = document.body.scrollWidth,
+					// Get the width and height
 					windowElement = window,
 					newWidth = windowElement.innerWidth,
 					newHeight = windowElement.innerHeight,
 					oldWidth = windowData.width,
 					oldHeight = windowData.height,
+					// Compare the width and height
 					widthChanged = ( newWidth !== oldWidth ),
 					heightChanged = ( newHeight !== oldHeight ),
+					// Find the change in the width and height
 					widthDelta = newWidth - oldWidth,
 					heightDelta = newHeight - oldHeight;
-				
+
 				// Set orientation
 				methods.resize.getOrientation( newWidth, newHeight );
 
@@ -216,6 +238,8 @@
 					if ( window.jQuery ){
 						jQuery(window).trigger( eventObject );
 					}
+					// Reset timeout for class
+					methods.resize.resetTimeout( settings.pollingTime );
 				}
 				// If we are using rAF
 				else {
@@ -226,14 +250,19 @@
 						if ( window.jQuery ){
 							jQuery(window).trigger( eventObject );
 						}
+						// Reset timeout for class
+						methods.resize.resetTimeout( settings.pollingTime );
+						// Reset frame
+						scheduledAnimationFrame = false;
 					} );
 				}
-				// Update the window data
+				// Update the window data for the next pass
 				windowData.width = newWidth;
 				windowData.height = newHeight;
+				windowData.documentHeight = newDocumentHeight;
+				windowData.documentWidth = newDocumentWidth;
 				// Reset our vars
 				windowData.hasResized = false;
-				scheduledAnimationFrame = false;
 			},
 			/**
 			 * Gets the orientation of the viewport with matchMedia and using width/height as fallback. Puts the result into the windowData.orientation
@@ -253,16 +282,39 @@
 					if ( width > height || width === height ){ windowData.orientation = 'landscape'; }
 					if ( width < height ){ windowData.orientation = 'portrait'; }
 				}
+			},
+			/**
+			 * Controls a timeout that we have during the event.
+			 * Mainly controls a class during scrolling for optional style changes.
+			 * @param  {[number]} pollingTime The timeout length to set.
+			 */
+			resetTimeout: function( pollingTime ){
+				if ( methods.resize.timeout ){
+					clearTimeout( methods.resize.timeout );
+				}
+				methods.resize.timeout = setTimeout(function removeResizeClass(){ 
+					document.querySelector('html').classList.remove(settings.resizeClass); 
+				}, pollingTime);
 			}
 		},
 		// Scrolling functions
 		scroll: {
+			timeout: null,
+			/**
+			 * Function that starts handling the raw event for us.
+			 * @private
+			 */
 			on: function(){
+				var htmlEl = document.querySelector('html');
 				// Set so we know we've scrolled.
 				windowData.hasScrolled = true;
 				// If using rAF, do some different checking.
 				if ( settings.useRAF ){
 					methods.checkAnimationFrame();
+				}
+				// Set the scrolling class if it isn't there
+				if ( !htmlEl.classList.contains(settings.scrollClass) ){
+					htmlEl.classList.add(settings.scrollClass);
 				}
 			},
 			/**
@@ -273,14 +325,17 @@
 				// Calculations
 				var 
 					windowElement = window,
+					// Raw scroll down the page
 					scrollY = windowElement.pageYOffset,
 					scrollX = windowElement.pageXOffset,
-					documentHeight = document.body.scrollHeight,
-					documentWidth = document.body.scrollWidth,
+					// Scroll percentage down the page
+					documentHeight = windowData.documentHeight,
+					documentWidth = windowData.documentWidth,
 					scrollPercentYRaw = ( scrollY / ( documentHeight - windowData.height ) ) * 100,
 					scrollPercentXRaw = ( scrollX / ( documentWidth - windowData.width ) ) * 100,
-					scrollPercentY = ( scrollPercentYRaw > 100 ) ? 100 : scrollPercentYRaw,
-					scrollPercentX = ( scrollPercentXRaw > 100 ) ? 100 : scrollPercentXRaw,
+					scrollPercentY = methods.scroll.getScrollPercent( scrollPercentYRaw ),
+					scrollPercentX = methods.scroll.getScrollPercent( scrollPercentXRaw ),
+					// Compare current and previous positions, give us the change
 					scrollDeltaY = scrollY - windowData.scrollPositionY,
 					scrollDeltaX = scrollX - windowData.scrollPositionX;
 
@@ -305,6 +360,8 @@
 					if ( window.jQuery ){
 						jQuery(window).trigger( eventObject );
 					}
+					// Reset timeout for class
+					methods.scroll.resetTimeout( settings.pollingTime );
 				}
 				// If we are using rAF
 				else {
@@ -315,18 +372,48 @@
 						if ( window.jQuery ){
 							jQuery(window).trigger( eventObject );
 						}
+						// Reset timeout for class
+						methods.scroll.resetTimeout( 16.6667 );
+						// Reset frame
+						scheduledAnimationFrame = false;
 					} );
 				}
-				// Update the window data
+				// Update the window data for the next pass
 				windowData.scrollPositionY = scrollY;
 				windowData.scrollPositionX = scrollX;
 				// Reset our vars
 				windowData.hasScrolled = false;
-				scheduledAnimationFrame = false;
+			},
+			/**
+			 * Normalizes the raw scroll percentage on either end so that it stays within a 0-100 range.
+			 * @param  {[number]} rawPercent The raw percentage calculated
+			 * @return {[number]}            The normalized percentage
+			 */
+			getScrollPercent: function( rawPercent ){
+				var percent = 0; // Our eventual percent
+
+				if ( rawPercent < 0 ){ percent = 0; } // If its smaller than 0, keep it at 0
+				else if ( rawPercent > 100 ){ percent = 100; } // If its bigger than 100, keep it at 100
+				else { percent = rawPercent; } // Otherwise, give us what you got
+
+				return percent; // Return it
+			},
+			/**
+			 * Controls a timeout that we have during the event.
+			 * Mainly controls a class during scrolling for optional style changes.
+			 * @param  {[number]} pollingTime The timeout length to set.
+			 */
+			resetTimeout: function( pollingTime ){
+				if ( methods.scroll.timeout ){
+					clearTimeout( methods.scroll.timeout );
+				}
+				methods.scroll.timeout = setTimeout(function removeScrollClass(){ 
+					document.querySelector('html').classList.remove(settings.scrollClass); 
+				}, pollingTime);
 			}
 		},
 		/**
-		 * Polling function that constantly runs in the background. The polling function will use rAF or setInterval, depending on user options.
+		 * Polling function that constantly runs in the background. The polling function will use setInterval.
 		 * @private
 		 */
 		poll: function(){
@@ -363,11 +450,11 @@
 				// We're processing a frame. Make sure we don't double up.
 				scheduledAnimationFrame = true; 
 				// Do we want scroll events?
-				if ( settings.detectScroll === true ){
+				if ( windowData.hasScrolled && settings.detectScroll === true ){
 					methods.scroll.event(); // Do our scroll event
 				}
 				// Do we want resize events?
-				if ( settings.detectResize === true ){
+				if ( windowData.hasResized && settings.detectResize === true ){
 					methods.resize.event(); // Do our resize event
 				}
 			}

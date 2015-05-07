@@ -24,6 +24,7 @@
                 left: 0;
                 width: 100%;
                 overflow-x: auto;
+
             }
             .row {
                 display: block;
@@ -31,8 +32,12 @@
             .scrollPercent {
                 position: fixed;
                 top: 0;
-                background: red;
-                z-index: 1;       
+                background-color: red;
+                z-index: 1;
+                transition-property: background-color;
+                transition-duration: 0.5s;
+                transition-timing-function: ease;
+                transition-delay: 0.25s;
             }
             #scrollPercentX {
                 left: 0;
@@ -43,6 +48,11 @@
                 right: 0;
                 width: 0.25em;
                 height: 0;
+            }
+
+            .wt-scrolling .scrollPercent { 
+                background-color: blue;
+                transition-delay: 0s;
             }
         </style>
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
