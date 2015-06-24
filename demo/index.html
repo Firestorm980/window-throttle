@@ -106,6 +106,7 @@
 
 		<script>
 			(function($) {
+                // Events during the interaction.
                 window.addEventListener('wt.resize', function(event){ 
                     document.getElementById('orientation').innerHTML = event.detail.orientation;
                     document.getElementById('height').innerHTML = event.detail.dimensions.height;
@@ -121,6 +122,15 @@
                     document.getElementById('scrollPercentX').style.width = event.detail.percent.x+'%';
                     document.getElementById('sTop').innerHTML = event.detail.scroll.y;
                     document.getElementById('sLeft').innerHTML = event.detail.scroll.x;
+                }, false);
+
+                // End events. Useful for debouncing instead of throttling. 
+                // Also might be useful in general to know when a user stops interacting.
+                window.addEventListener('wt.scrollEnd', function(event){
+                    console.log(event.detail);
+                }, false);
+                window.addEventListener('wt.resizeEnd', function(event){
+                    console.log(event.detail);
                 }, false);
 
                 // If you'd like to use jQuery...
@@ -142,7 +152,7 @@
                     jQuery('#sLeft').text( event.scroll.x );
                 });
                 */
-                WindowThrottle.init({ useRAF: true });
+                WindowThrottle.init();
                 
 			})();
 		</script>

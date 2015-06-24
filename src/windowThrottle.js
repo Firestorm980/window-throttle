@@ -47,10 +47,10 @@
 		// Options
 		detectResize: true, // Set to detect resize
 		detectScroll: true, // Set to detect scrolling
-		pollingTime: 150, // Uses setInterval
-		useRAF: false, // Uses requestAnimationFrame. Falls back to a timeout.
-		scrollClass: 'wt-scrolling',
-		resizeClass: 'wt-resizing'
+		scrollClass: 'wt-scrolling', // Class while scrolling
+		resizeClass: 'wt-resizing', // Class while resizing
+		debounce: false, // Debounce instead?
+		debounceTime: 250 // Time to wait to fire for debouncing
 	};
  
  
@@ -147,11 +147,6 @@
 				// Start it up
 				methods.scroll.event();
 			}
-			// Start polling if we aren't using rAF.
-			// rAF essentially will poll "on demand"
-			if ( !settings.useRAF ){
-				methods.poll();
-			}
 		},
 		/**
 		 * Polyfill function so that the requestAnimationFrame function is normalized between browsers.
@@ -172,7 +167,9 @@
 		},
 		// Resize functions
 		resize: {
-			timeout: null,
+			timeoutClass: null,
+			timeoutDebounce: null,
+			lastEventObject: false,
 			/**
 			 * Function that starts handling the raw event for us.
 			 * @private
@@ -182,9 +179,16 @@
 				// Set so we know we've resized.
 				windowData.hasResized = true;
 				// If using rAF, do some different checking.
-				if ( settings.useRAF ){
+				if ( !settings.debounce ){
 					methods.checkAnimationFrame();
 				}
+				else {
+					if ( methods.resize.timeoutDebounce ) {
+						clearTimeout( methods.resize.timeoutDebounce );
+					}
+					methods.resize.timeoutDebounce = setTimeout( methods.resize.event, settings.debounceTime );
+				}
+				
 				// Set the resize class if it isn't there
 				if ( !htmlEl.classList.contains(settings.resizeClass) ){
 					htmlEl.classList.add(settings.resizeClass);
@@ -195,6 +199,45 @@
 			 * @private
 			 */
 			event: function(){
+				// Calculations
+				var 
+					windowElement = window,
+					// New document dimensions to store
+					newDocumentHeight = document.body.scrollHeight,
+					newDocumentWidth = document.body.scrollWidth,
+					// Get the width and height
+					newWidth = windowElement.innerWidth,
+					newHeight = windowElement.innerHeight,
+					eventObject = methods.resize.getEventObject();
+
+				// Kick off the event
+				requestAnimFrame( function(){ 
+					// Trigger vanilla
+					methods.events.triggerCustom( windowElement, 'wt.resize', eventObject); 
+					// Trigger jQuery
+					if ( window.jQuery ){
+						jQuery(window).trigger( eventObject );
+					}
+					methods.resize.lastEventObject = eventObject;
+					// Reset timeout for class
+					methods.resize.resetTimeout( 100 );
+					// Reset frame
+					scheduledAnimationFrame = false;
+				} );
+				
+				// Update the window data for the next pass
+				windowData.width = newWidth;
+				windowData.height = newHeight;
+				windowData.documentHeight = newDocumentHeight;
+				windowData.documentWidth = newDocumentWidth;
+				// Reset our vars
+				windowData.hasResized = false;
+			},
+			/**
+			 * Grab all our event data in one spot.
+			 * @return {object} [An array like event object for us to use.]
+			 */
+			getEventObject: function(){
 				// Calculations
 				var 
 					// New document dimensions to store
@@ -229,40 +272,7 @@
 					eventObject.type = 'wt.resize';
 				}
 
-				// Kick off the event
-				// If we're not using rAF
-				if ( !settings.useRAF ){
-					// Trigger vanilla
-					methods.events.triggerCustom( windowElement, 'wt.resize', eventObject);
-					// Trigger jQuery
-					if ( window.jQuery ){
-						jQuery(window).trigger( eventObject );
-					}
-					// Reset timeout for class
-					methods.resize.resetTimeout( settings.pollingTime );
-				}
-				// If we are using rAF
-				else {
-					requestAnimFrame( function(){ 
-						// Trigger vanilla
-						methods.events.triggerCustom( windowElement, 'wt.resize', eventObject); 
-						// Trigger jQuery
-						if ( window.jQuery ){
-							jQuery(window).trigger( eventObject );
-						}
-						// Reset timeout for class
-						methods.resize.resetTimeout( settings.pollingTime );
-						// Reset frame
-						scheduledAnimationFrame = false;
-					} );
-				}
-				// Update the window data for the next pass
-				windowData.width = newWidth;
-				windowData.height = newHeight;
-				windowData.documentHeight = newDocumentHeight;
-				windowData.documentWidth = newDocumentWidth;
-				// Reset our vars
-				windowData.hasResized = false;
+				return eventObject;
 			},
 			/**
 			 * Gets the orientation of the viewport with matchMedia and using width/height as fallback. Puts the result into the windowData.orientation
@@ -289,17 +299,30 @@
 			 * @param  {[number]} pollingTime The timeout length to set.
 			 */
 			resetTimeout: function( pollingTime ){
-				if ( methods.resize.timeout ){
-					clearTimeout( methods.resize.timeout );
+				if ( methods.resize.timeoutClass ){
+					clearTimeout( methods.resize.timeoutClass );
 				}
-				methods.resize.timeout = setTimeout(function removeResizeClass(){ 
+				methods.resize.timeoutClass = setTimeout(function removeResizeClass(){ 
+					var eventObject = ( !methods.resize.lastEventObject ) ? methods.resize.getEventObject() : methods.resize.lastEventObject;
+
+					// Remove the resize class
 					document.querySelector('html').classList.remove(settings.resizeClass); 
+
+					// Fire off our end resize event.
+					// Trigger vanilla
+					methods.events.triggerCustom( window, 'wt.resizeEnd', eventObject);
+					// Trigger jQuery
+					if ( window.jQuery ){
+						jQuery(window).trigger( eventObject );
+					}
 				}, pollingTime);
 			}
 		},
 		// Scrolling functions
 		scroll: {
-			timeout: null,
+			timeoutClass: null,
+			timeoutDebounce: null,
+			lastEventObject: false,
 			/**
 			 * Function that starts handling the raw event for us.
 			 * @private
@@ -309,9 +332,16 @@
 				// Set so we know we've scrolled.
 				windowData.hasScrolled = true;
 				// If using rAF, do some different checking.
-				if ( settings.useRAF ){
+				if ( !settings.debounce ){
 					methods.checkAnimationFrame();
 				}
+				else {
+					if ( methods.scroll.timeoutDebounce ) {
+						clearTimeout( methods.scroll.timeoutDebounce );
+					}
+					methods.scroll.timeoutDebounce = setTimeout( methods.scroll.event, settings.debounceTime );
+				}
+
 				// Set the scrolling class if it isn't there
 				if ( !htmlEl.classList.contains(settings.scrollClass) ){
 					htmlEl.classList.add(settings.scrollClass);
@@ -322,6 +352,40 @@
 			 * @private
 			 */
 			event: function(){
+				// Calculations
+				var 
+					windowElement = window,
+					// Raw scroll down the page
+					scrollY = windowElement.pageYOffset,
+					scrollX = windowElement.pageXOffset,
+					eventObject = methods.scroll.getEventObject();
+
+				// Kick off the event
+				requestAnimFrame( function(){ 
+					// Trigger vanilla
+					methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
+					// Trigger jQuery
+					if ( window.jQuery ){
+						jQuery(window).trigger( eventObject );
+					}
+					methods.scroll.lastEventObject = eventObject;
+					// Reset timeout for class
+					methods.scroll.resetTimeout( 100 );
+					// Reset frame
+					scheduledAnimationFrame = false;
+				} );
+				
+				// Update the window data for the next pass
+				windowData.scrollPositionY = scrollY;
+				windowData.scrollPositionX = scrollX;
+				// Reset our vars
+				windowData.hasScrolled = false;
+			},
+			/**
+			 * Grab all our event data in one spot.
+			 * @return {object} [An array like event object for us to use.]
+			 */
+			getEventObject: function(){
 				// Calculations
 				var 
 					windowElement = window,
@@ -351,38 +415,7 @@
 					eventObject.type = 'wt.scroll';
 				}
 
-				// Kick off the event
-				// If we aren't using rAF
-				if ( !settings.useRAF ){
-					// Trigger vanilla
-					methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
-					// Trigger jQuery
-					if ( window.jQuery ){
-						jQuery(window).trigger( eventObject );
-					}
-					// Reset timeout for class
-					methods.scroll.resetTimeout( settings.pollingTime );
-				}
-				// If we are using rAF
-				else {
-					requestAnimFrame( function(){ 
-						// Trigger vanilla
-						methods.events.triggerCustom( windowElement, 'wt.scroll', eventObject);
-						// Trigger jQuery
-						if ( window.jQuery ){
-							jQuery(window).trigger( eventObject );
-						}
-						// Reset timeout for class
-						methods.scroll.resetTimeout( 16.6667 );
-						// Reset frame
-						scheduledAnimationFrame = false;
-					} );
-				}
-				// Update the window data for the next pass
-				windowData.scrollPositionY = scrollY;
-				windowData.scrollPositionX = scrollX;
-				// Reset our vars
-				windowData.hasScrolled = false;
+				return eventObject;
 			},
 			/**
 			 * Normalizes the raw scroll percentage on either end so that it stays within a 0-100 range.
@@ -404,11 +437,22 @@
 			 * @param  {[number]} pollingTime The timeout length to set.
 			 */
 			resetTimeout: function( pollingTime ){
-				if ( methods.scroll.timeout ){
-					clearTimeout( methods.scroll.timeout );
+				if ( methods.scroll.timeoutClass ){
+					clearTimeout( methods.scroll.timeoutClass );
 				}
-				methods.scroll.timeout = setTimeout(function removeScrollClass(){ 
+				methods.scroll.timeoutClass = setTimeout(function removeScrollClass(){ 
+					var eventObject = ( !methods.scroll.lastEventObject ) ? methods.scroll.getEventObject() : methods.scroll.lastEventObject;
+
+					// Remove the scrolling class
 					document.querySelector('html').classList.remove(settings.scrollClass); 
+
+					// Throw out a scrollEnd event. 
+					// Trigger vanilla
+					methods.events.triggerCustom( window, 'wt.scrollEnd', eventObject);
+					// Trigger jQuery
+					if ( window.jQuery ){
+						jQuery(window).trigger( eventObject );
+					}
 				}, pollingTime);
 			}
 		},
@@ -421,21 +465,6 @@
 			if ( !settings.useRAF ){
 				// Check for changes using the polling time in the settings.
 				setInterval( methods.checkForChanges, settings.pollingTime);
-			}
-		},
-		/**
-		 * Function to run at every polling time to see if anything changed since the last poll time.
-		 * If something did change and we want to know about it, change the windowData appropriately so we can emit our event.
-		 * @private
-		 */
-		checkForChanges: function(){
-			// Check if we've scrolled and if we're interested
-			if ( windowData.hasScrolled && settings.detectScroll === true ){
-				methods.scroll.event(); // Do our scroll event
-			}
-			// Check if we've resized and if we're interested
-			if ( windowData.hasResized && settings.detectResize === true ){
-				methods.resize.event(); // Do our resize event
 			}
 		},
 		/**
