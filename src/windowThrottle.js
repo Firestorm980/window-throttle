@@ -2,7 +2,7 @@
  * Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.3
+ * @version: 1.4
  *
  * Licensed under the MIT License.
  */
@@ -37,7 +37,9 @@
 		scrollPositionX: 0,
 		orientation: null,
 		documentHeight: 0,
-		documentWidth: 0
+		documentWidth: 0,
+		isScrolling: false,
+		isResizing: false
 	};
 
 	var scheduledAnimationFrame = false;
@@ -167,8 +169,8 @@
 		},
 		// Resize functions
 		resize: {
-			timeoutClass: null,
-			timeoutDebounce: null,
+			timeoutClass: false,
+			timeoutDebounce: false,
 			lastEventObject: false,
 			/**
 			 * Function that starts handling the raw event for us.
@@ -178,6 +180,8 @@
 				var htmlEl = document.querySelector('html');
 				// Set so we know we've resized.
 				windowData.hasResized = true;
+				windowData.isResizing = true;
+
 				// If using rAF, do some different checking.
 				if ( !settings.debounce ){
 					methods.checkAnimationFrame();
@@ -220,7 +224,7 @@
 					}
 					methods.resize.lastEventObject = eventObject;
 					// Reset timeout for class
-					methods.resize.resetTimeout( 100 );
+					methods.resetTimeout( settings.debounceTime, 'resize' );
 					// Reset frame
 					scheduledAnimationFrame = false;
 				} );
@@ -292,36 +296,12 @@
 					if ( width > height || width === height ){ windowData.orientation = 'landscape'; }
 					if ( width < height ){ windowData.orientation = 'portrait'; }
 				}
-			},
-			/**
-			 * Controls a timeout that we have during the event.
-			 * Mainly controls a class during scrolling for optional style changes.
-			 * @param  {[number]} pollingTime The timeout length to set.
-			 */
-			resetTimeout: function( pollingTime ){
-				if ( methods.resize.timeoutClass ){
-					clearTimeout( methods.resize.timeoutClass );
-				}
-				methods.resize.timeoutClass = setTimeout(function removeResizeClass(){ 
-					var eventObject = ( !methods.resize.lastEventObject ) ? methods.resize.getEventObject() : methods.resize.lastEventObject;
-
-					// Remove the resize class
-					document.querySelector('html').classList.remove(settings.resizeClass); 
-
-					// Fire off our end resize event.
-					// Trigger vanilla
-					methods.events.triggerCustom( window, 'wt.resizeEnd', eventObject);
-					// Trigger jQuery
-					if ( window.jQuery ){
-						jQuery(window).trigger( eventObject );
-					}
-				}, pollingTime);
 			}
 		},
 		// Scrolling functions
 		scroll: {
-			timeoutClass: null,
-			timeoutDebounce: null,
+			timeoutClass: false,
+			timeoutDebounce: false,
 			lastEventObject: false,
 			/**
 			 * Function that starts handling the raw event for us.
@@ -331,6 +311,8 @@
 				var htmlEl = document.querySelector('html');
 				// Set so we know we've scrolled.
 				windowData.hasScrolled = true;
+				windowData.isScrolling = true;
+
 				// If using rAF, do some different checking.
 				if ( !settings.debounce ){
 					methods.checkAnimationFrame();
@@ -370,7 +352,7 @@
 					}
 					methods.scroll.lastEventObject = eventObject;
 					// Reset timeout for class
-					methods.scroll.resetTimeout( 100 );
+					methods.resetTimeout( settings.debounceTime , 'scroll' );
 					// Reset frame
 					scheduledAnimationFrame = false;
 				} );
@@ -431,42 +413,54 @@
 
 				return percent; // Return it
 			},
-			/**
-			 * Controls a timeout that we have during the event.
-			 * Mainly controls a class during scrolling for optional style changes.
-			 * @param  {[number]} pollingTime The timeout length to set.
-			 */
-			resetTimeout: function( pollingTime ){
-				if ( methods.scroll.timeoutClass ){
-					clearTimeout( methods.scroll.timeoutClass );
-				}
-				methods.scroll.timeoutClass = setTimeout(function removeScrollClass(){ 
-					var eventObject = ( !methods.scroll.lastEventObject ) ? methods.scroll.getEventObject() : methods.scroll.lastEventObject;
 
-					// Remove the scrolling class
-					document.querySelector('html').classList.remove(settings.scrollClass); 
-
-					// Throw out a scrollEnd event. 
-					// Trigger vanilla
-					methods.events.triggerCustom( window, 'wt.scrollEnd', eventObject);
-					// Trigger jQuery
-					if ( window.jQuery ){
-						jQuery(window).trigger( eventObject );
-					}
-				}, pollingTime);
-			}
 		},
 		/**
-		 * Polling function that constantly runs in the background. The polling function will use setInterval.
-		 * @private
+		 * Controls a timeout that we have during the event.
+		 * Mainly controls: 
+		 * - A class during the event for optional style changes
+		 * - An 'End' event
+		 * - Our 'is' state boolean
+		 * 
+		 * @param {number}	pollingTime 	[The timeout length to set, passed from the call.]
+		 * @param {string}	type 			[The type of event (scroll, resize).]
 		 */
-		poll: function(){
-			// Check if we're using rAF
-			if ( !settings.useRAF ){
-				// Check for changes using the polling time in the settings.
-				setInterval( methods.checkForChanges, settings.pollingTime);
+		resetTimeout: function( pollingTime, type ){
+			// If there is a timeout, clear it.
+			if ( methods[type].timeoutClass ){
+				clearTimeout( methods[type].timeoutClass );
 			}
+			methods[type].timeoutClass = setTimeout(function removeScrollClass(){ 
+				// Get a fresh event object if none exists (on page load) or grab the last one, which has accurate data.
+				var eventObject = ( !methods[type].lastEventObject ) ? methods[type].getEventObject() : methods[type].lastEventObject;
+
+				// Remove the scrolling class
+				document.querySelector('html').classList.remove(settings[type+'Class']); 
+
+				// Throw out a scrollEnd event. 
+				// Since having debouncing true will fire an event at the end anyways, no need to fire two of the same thing.
+				if ( !settings.debounce ){
+					// Trigger vanilla
+					methods.events.triggerCustom( window, 'wt.'+type+'End', eventObject);
+					// Trigger jQuery
+					if ( window.jQuery ){
+						eventObject.type = 'wt.'+type+'End'; // Since we usually set this in the object before, overwrite it.
+						jQuery(window).trigger( eventObject ); // Trigger the jQuery event.
+					}
+				}
+
+				// Set our 'is' bool
+				switch ( type ){
+					case 'scroll': 
+						windowData.isScrolling = false; // No longer scrolling. Set it false.
+						break;
+					case 'resize':
+						windowData.isResizing = false; // No longer resizing. Set it false.
+						break;
+				}
+			}, pollingTime);
 		},
+
 		/**
 		 * Function runs at every native scroll and resize event.
 		 * It checks if we're currently working on a frame. If we aren't, it queues up a new one with the event.
@@ -506,6 +500,7 @@
 				CustomEvent.prototype = window.Event.prototype;
 				window.CustomEvent = CustomEvent;
 			},
+
 			/**
 			 * Set off our custom events from the plugin.
 			 * @param  {Object} el          The document element to attach the event to.
@@ -525,7 +520,6 @@
 	 * @param {Object} options User settings
 	 */
 	WindowThrottle.init = function ( options ) {
- 
 		// feature test
 		if ( !supports ) return;
  
@@ -534,7 +528,30 @@
 
 		// Start it up
 		methods.init();
- 
+	};
+
+	/**
+	 * Helper method to check and see if a current type of event is happening.
+	 * Could be useful in certain circumstances where you want to activate something, but not while interaction is taking place.
+	 * @param  {string}  type [The interaction/event that we're looking at.]
+	 * @return {Boolean}      [The true/false of the interaction.]
+	 */
+	WindowThrottle.is = function( type ){
+		// Run through all our possibilities
+		switch ( type ){
+
+			// When someone is / isn't scrolling.
+			case 'scrolling':
+				return windowData.isScrolling; // Give them the var
+
+			// When someone is / isn't resizing.
+			case 'resizing':
+				return windowData.isResizing; // Give them the var
+
+			// Specified type doesn't exist. Throw an error.
+			default:
+				console.error('WindowThrottle: Please specify either "scrolling" or "resizing" when checking state.');
+		}
 	};
  
 	//
