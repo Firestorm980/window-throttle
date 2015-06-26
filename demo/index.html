@@ -13,7 +13,7 @@
 
         <style>
             .container {
-                width: 1000px;
+               /* width: 1000px; */
                 margin: 0 auto;
             }
             .fixed {
@@ -24,6 +24,7 @@
                 left: 0;
                 width: 100%;
                 overflow-x: auto;
+
             }
             .row {
                 display: block;
@@ -31,18 +32,27 @@
             .scrollPercent {
                 position: fixed;
                 top: 0;
-                background: red;
-                z-index: 1;       
+                background-color: red;
+                z-index: 1;
+                transition-property: background-color;
+                transition-duration: 0.5s;
+                transition-timing-function: ease;
+                transition-delay: 0.25s;
             }
             #scrollPercentX {
                 left: 0;
-                width: 0;
+                width: 100%;
                 height: 0.25em;
             }
             #scrollPercentY {
                 right: 0;
                 width: 0.25em;
                 height: 0;
+            }
+
+            .wt-scrolling .scrollPercent { 
+                background-color: blue;
+                transition-delay: 0s;
             }
         </style>
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
@@ -89,14 +99,14 @@
             <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laudantium illo voluptas quod rem fugit nulla veniam labore fugiat? Ad aut architecto consequatur fugit sed voluptatum eveniet voluptatem officia facere, ab!</p>
         </div>
 
-        <!-- If you'd like to use jQuery...
+        <!-- If you'd like to use jQuery... 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-		<script src="../src/jquery.windowThrottle.js"></script>
         -->
         <script src="../src/windowThrottle.js"></script>
 
 		<script>
 			(function($) {
+                // Events during the interaction.
                 window.addEventListener('wt.resize', function(event){ 
                     document.getElementById('orientation').innerHTML = event.detail.orientation;
                     document.getElementById('height').innerHTML = event.detail.dimensions.height;
@@ -114,28 +124,15 @@
                     document.getElementById('sLeft').innerHTML = event.detail.scroll.x;
                 }, false);
 
-                WindowThrottle.init({ useRAF: true });
+                // End events. Useful for debouncing instead of throttling. 
+                // Also might be useful in general to know when a user stops interacting.
+                window.addEventListener('wt.scrollEnd', function(event){
+                    console.log('scroll end');
+                }, false);
+                window.addEventListener('wt.resizeEnd', function(event){
+                    console.log('resize end');
+                }, false);
 
-                /* If you'd like to use jQuery...
-
-				jQuery(window).on('throttle.resize', function(event){
- 
-                    jQuery('#orientation').text( event.orientation );
-                    jQuery('#height').text( event.dimensions.height );
-                    jQuery('#width').text( event.dimensions.width );
-                    jQuery('#hDelta').text( event.delta.height );
-                    jQuery('#wDelta').text( event.delta.width );
-                });
-                jQuery(window).on('throttle.scroll', function(event){ 
-
-                    jQuery('#sYDelta').text( event.delta.y );
-                    jQuery('#scrollPercentX').css({ width : event.percent.x+'%' });
-                    jQuery('#sXDelta').text( event.delta.x );
-                    jQuery('#scrollPercentY').css({ height : event.percent.y+'%' });
-                });
-
-                jQuery.WindowThrottle();
-                */
 			})();
 		</script>
 

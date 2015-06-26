@@ -2,7 +2,7 @@ Window Throttle
 ===============
 ##The overdone window event plugin
 
-Window Throttle (WT) normalizes and throttles the window scroll and resize events between browsers while also offering some great event data so that you stop calculating values and just get things done. WT uses either a custom interval timeout or Request Animation Frame to poll the window for any changes in size or scroll position. It is available in vanilla JS or a jQuery plugin. WT returns the following data:
+Window Throttle (WT) normalizes and throttles the window scroll and resize events between browsers while also offering some great event data so that you stop calculating values and just get things done. WT uses Request Animation Frame during window events to get the best performance and timing. It is made entirely with vanilla JS, but has support for jQuery events. As of version 1.3, WT also supports optional debouncing. WT returns the following data:
 
 ####Scroll
 - Scroll percentage in either direction on the page (event.percent)
@@ -72,10 +72,10 @@ With jQuery:
 </script>
 ```
 
-#####Event Data
+##### Event Data
 Here are two examples of the event data returned when one of the custom events is triggered. Keep in mind that when using the vanilla version the event object is slightly different. You'll need to access data with "event.details", where jQuery you'll just need "event".
 
-######Scrolling
+###### Scrolling
 ```Javascript
 {
 	delta: { y: 0, x: 0 },
@@ -83,7 +83,7 @@ Here are two examples of the event data returned when one of the custom events i
 	scroll: { y: 0, x: 0 }
 }
 ```
-######Resize
+###### Resize
 ```Javascript
 {
 	changed: { width: false, height: false },
@@ -93,18 +93,53 @@ Here are two examples of the event data returned when one of the custom events i
 }
 ```
 
-####Options
+#### Options
 These are the options currently available for WT:
 
-| Option       | Type   | Default        | Description                                                             |
-|--------------|--------|----------------|-------------------------------------------------------------------------|
-| `detectResize`  | `boolean` | `true`   | Bind the resize event |
-| `detectScroll`  | `boolean` | `true`   | Bind the scroll event |
-| `pollingTime`   | `number`  | `150`    | Set the amount of time between polling in milliseconds. Disabled if `useRAF` is `true`. |
-| `useRAF`        | `boolean` | `false`  | Use window.requestAnimationFrame. Overrides `pollingTime`. Falls back to setTimeout in older browsers. |
+| Option       | Type   | Default              | Description                                                       |
+|--------------|--------|----------------------|-------------------------------------------------------------------|
+| `detectResize`  | `boolean` | `true`         | Bind the resize event |
+| `detectScroll`  | `boolean` | `true`         | Bind the scroll event |
+| `scrollClass`   | `string`  | `wt-scrolling` | Class that will be added to the `html` element during scroll |
+| `resizeClass`   | `string`  | `wt-resize`    | Class that will be added to the `html` element during resize |
+| `debounce`      | `boolean` | `false`        | Debounce the events instead of throttle them. Disables the `wt.scrollEnd` and `wt.resizeEnd` events |
+| `debounceTime`  | `number`  | `250`          | Controls sensitivity of the debouncer. Smaller number is more sensitive. Also controls sensitivity of the "end" events when `debounce` is set to `false` |
 
+#### Events
 
-##Changelog
+##### End Events
+As of version 1.3, additional events will now fire at the end of both scrolling and resizing. They are `wt.scrollEnd` and `wt.resizeEnd` respectively. This can give you the opportunity to bind events *after* those interactions are completed. Notice that this is very similar and could be used similarly to debouncing. The difference being that when debouncing is on, no events will fire at all *during* the interaction. Since the `wt.scroll` and `wt.resize` events would fire at the same time with deboucning on, the end events are disabled when the `debounce` option is `true`.
+
+#### Methods
+There are now multiple methods for WT.
+
+##### Init
+Starts up the plugin. Put in options from above if you'd like to change them.
+
+```Javascript
+WindowThrottle.init({ // options... });
+```
+
+##### Is
+Returns a boolean value based on if the user is currently scrolling or resizing. This could be useful if you'd like something to happen in response to these events, but not while a user is actively interacting with the page.
+
+```Javascript
+// Check if user is currently scrolling
+WindowThrottle.is('scrolling');
+
+// Check if user is currently resizing
+WindowThrottle.is('resizing');
+```
+
+## Changelog
+
+####1.3
+- Removed legacy polling in favor of always using requestAnimationFrame with a fallback.
+- Added debouncing as an option. Only fires an event at the end of interaction vs multiple events during.
+- Added `wt.scrollEnd` and `wt.resizeEnd` events.
+- Added the `WindowThrottle.is()` method as a boolean check.
+- Added classes during events that can be optionally changed. This could be useful for deactivating certain styles while interaction is occuring.
+- Further code impovements and organization interally.
 
 ####1.2
 - Added scrolling data for page position (essentially `scrollTop` and `scrollLeft`)
