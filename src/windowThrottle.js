@@ -2,7 +2,7 @@
  * Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.4
+ * @version: 1.3
  *
  * Licensed under the MIT License.
  */
