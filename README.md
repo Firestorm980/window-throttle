@@ -133,6 +133,9 @@ WindowThrottle.is('resizing');
 
 ## Changelog
 
+####1.3.1
+- Fixed an issue with 'classList' and IE9. IE9 doesn't support that and it's methods, so implemented a fallback.
+
 ####1.3
 - Removed legacy polling in favor of always using requestAnimationFrame with a fallback.
 - Added debouncing as an option. Only fires an event at the end of interaction vs multiple events during.
