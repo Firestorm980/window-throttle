@@ -2,7 +2,7 @@
  * Window Throttle
  * @author: Jon Christensen (Firestorm980)
  * @github: https://github.com/Firestorm980/WindowThrottle
- * @version: 1.3
+ * @version: 1.3.1
  *
  * Licensed under the MIT License.
  */
@@ -194,9 +194,17 @@
 				}
 				
 				// Set the resize class if it isn't there
-				if ( !htmlEl.classList.contains(settings.resizeClass) ){
-					htmlEl.classList.add(settings.resizeClass);
+				if (htmlEl.classList) {
+					if ( !htmlEl.classList.contains(settings.resizeClass) ){
+						htmlEl.classList.add(settings.resizeClass);						
+					}
 				}
+				else {
+					var hasClass = new RegExp('(^| )' + settings.resizeClass + '( |$)', 'gi').test(htmlEl.className);
+					if ( hasClass ){
+						htmlEl.className += ' ' + settings.resizeClass;
+					}
+				}				
 			},
 			/**
 			 * The resize event function. Handles all of the data we're interested in and triggers the 'wt.resize' event.
@@ -325,8 +333,16 @@
 				}
 
 				// Set the scrolling class if it isn't there
-				if ( !htmlEl.classList.contains(settings.scrollClass) ){
-					htmlEl.classList.add(settings.scrollClass);
+				if (htmlEl.classList) {
+					if ( !htmlEl.classList.contains(settings.scrollClass) ){
+						htmlEl.classList.add(settings.scrollClass);						
+					}
+				}
+				else {
+					var hasClass = new RegExp('(^| )' + settings.scrollClass + '( |$)', 'gi').test(htmlEl.className);
+					if ( hasClass ){
+						htmlEl.className += ' ' + settings.scrollClass;
+					}
 				}
 			},
 			/**
@@ -433,9 +449,16 @@
 			methods[type].timeoutClass = setTimeout(function removeScrollClass(){ 
 				// Get a fresh event object if none exists (on page load) or grab the last one, which has accurate data.
 				var eventObject = ( !methods[type].lastEventObject ) ? methods[type].getEventObject() : methods[type].lastEventObject;
+				var htmlEl = document.querySelector('html');
+				var className = settings[type+'Class'];
 
 				// Remove the scrolling class
-				document.querySelector('html').classList.remove(settings[type+'Class']); 
+				if ( htmlEl.classList ) {
+					htmlEl.classList.remove(className);
+				}
+				else {
+					htmlEl.className = htmlEl.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');
+				}
 
 				// Throw out a scrollEnd event. 
 				// Since having debouncing true will fire an event at the end anyways, no need to fire two of the same thing.
